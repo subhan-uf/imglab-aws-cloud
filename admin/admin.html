@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ImageLab — Admin Portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <style>
+    :root {
+      --bg:#f5f7fb; --text:#0f172a; --muted:#6b7280; --card:#ffffff; --brand:#0f172a;
+      --ok:#16a34a; --ok2:#15803d; --err:#dc2626; --err2:#b91c1c; --ring:rgba(2,6,23,0.08);
+      --tab:#e5e7eb; --tab-active:#111827; --tab-bg:#eef2ff;
+    }
+    *{box-sizing:border-box}
+    body{margin:0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:var(--bg); color:var(--text);}
+    header{background:var(--brand); color:#fff; padding:16px 24px; display:flex; align-items:center; justify-content:space-between; gap:12px; position:sticky; top:0; z-index:10}
+    header h1{margin:0; font-size:20px; font-weight:600; display:flex; align-items:center; gap:10px;}
+    .topbar{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
+    .identity{display:flex; align-items:center; gap:10px; color:#e5e7eb; font-size:13px}
+    .badge{display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background:#eef2ff; color:#3730a3; font-weight:600}
+    .pill{padding:4px 10px; border-radius:999px; background:#065f46; color:#d1fae5; font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:.03em}
+    .btn{border:none; border-radius:10px; padding:10px 14px; font-weight:600; cursor:pointer; transition:transform .06s ease, opacity .15s ease; background:#111827; color:#fff}
+    .btn:hover{opacity:.95} .btn:active{transform:scale(.98)}
+    .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,.25)}
+    main{max-width:1280px; margin:26px auto; padding:0 20px;}
+    #status{margin:12px 0 18px; color:var(--muted); font-size:14px}
+    #unauth{display:none; padding:14px; border-radius:12px; background:#fff1f2; color:var(--err2); border:1px solid #fecaca}
+    .tabs{display:flex; gap:10px; background:#fff; padding:8px; border-radius:12px; border:1px solid #e5e7eb; box-shadow:0 8px 20px var(--ring); position:sticky; top:64px; z-index:9}
+    .tab{appearance:none; border:none; background:transparent; padding:10px 14px; border-radius:10px; cursor:pointer; font-weight:700; color:#334155; display:flex; align-items:center; gap:8px}
+    .tab.active{background:var(--tab-bg); color:var(--tab-active)}
+    .tab .count{background:#111827; color:#fff; font-size:12px; padding:2px 8px; border-radius:999px}
+    .toolbar{display:flex; justify-content:space-between; align-items:center; gap:12px; margin:16px 0}
+    .search{flex:1; display:flex; gap:8px}
+    .search input{flex:1; padding:10px 12px; border:1px solid #e5e7eb; border-radius:10px; font-size:14px; outline:none}
+    .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:16px; margin-top:10px;}
+    .card{background:var(--card); border-radius:14px; box-shadow:0 8px 20px var(--ring); overflow:hidden; border:1px solid #e5e7eb}
+    .thumb{width:100%; height:200px; object-fit:cover; display:block}
+    .meta{padding:10px 12px; font-size:12px; color:#374151; border-top:1px solid #f1f5f9; display:flex; gap:8px; align-items:center; justify-content:space-between}
+    .meta small{color:#6b7280; font-size:11px}
+    .row{display:flex; gap:8px; padding:12px; border-top:1px solid #f1f5f9; background:#fafafa}
+    .btn-approve{background:var(--ok)} .btn-approve:hover{background:var(--ok2)}
+    .btn-reject{background:var(--err)} .btn-reject:hover{background:var(--err2)}
+    footer{margin:36px 0 24px; text-align:center; color:#6b7280; font-size:14px}
+    .empty{padding:24px; background:#fff; border:1px dashed #cbd5e1; border-radius:12px; text-align:center; color:#64748b}
+  </style>
+</head>
+<body>
+  <header>
+    <h1><i class="fa-solid fa-shield-halved"></i> ImageLab — Admin</h1>
+    <div class="topbar">
+      <div class="identity" id="identity"></div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost" onclick="App.login()"><i class="fa-solid fa-right-to-bracket"></i> Sign In</button>
+        <button class="btn btn-ghost" onclick="App.logout()"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="tabs">
+      <button class="tab active"   id="tab-pending"  onclick="App.switchTab('pending')"><i class="fa-regular fa-clock"></i> Pending <span class="count" id="count-pending">0</span></button>
+      <button class="tab"          id="tab-approved" onclick="App.switchTab('approved')"><i class="fa-regular fa-circle-check"></i> Approved <span class="count" id="count-approved">0</span></button>
+      <button class="tab"          id="tab-rejected" onclick="App.switchTab('rejected')"><i class="fa-regular fa-circle-xmark"></i> Rejected <span class="count" id="count-rejected">0</span></button>
+      <button class="btn" style="margin-left:auto" onclick="App.refreshCurrent()"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+    </div>
+
+    <div class="toolbar">
+      <div id="status">Loading…</div>
+      <div class="search">
+        <input id="filter" type="text" placeholder="Filter by filename…" oninput="App.filterCards(this.value)" />
+      </div>
+    </div>
+
+    <div id="unauth">You are not authorized to access this portal. Ask an owner to add you to the <strong>Admins</strong> group.</div>
+
+    <div id="grid" class="grid"></div>
+    <div id="empty" class="empty" style="display:none">No images.</div>
+  </main>
+
+  <footer>
+    Project by <strong>Subhan Farooq</strong>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

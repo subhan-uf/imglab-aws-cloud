@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>One Shot Gallery — By Subhan Farooq</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="One Shot Gallery — a living wall of humanity's favorite memories. Upload exactly one image, anonymously. Built end-to-end on AWS by Cloud Software Engineer Subhan Farooq." />
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+
+  <style>
+    :root{
+      --bg: #f0f9ff;
+      --ink: #0f172a;
+      --text: #334155;
+      --muted: #64748b;
+      --accent: #818cf8;
+      --accent2: #60a5fa;
+      --card: #ffffff;
+      --glass: rgba(255,255,255,0.7);
+      --ring: rgba(147, 197, 253, 0.3);
+      --ok:#10b981; --ok2:#059669;
+      --err:#ef4444; --err2:#b91c1c;
+      --warning: #f59e0b;
+      --cloud-light: #e0f2fe;
+      --cloud-mid: #bae6fd;
+      --cloud-dark: #7dd3fc;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0; padding:0; background:var(--bg); color:var(--text); font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; line-height: 1.6;}
+    a{color:inherit; text-decoration:none}
+    img{display:block; max-width:100%}
+
+    /* Cloud background */
+    .aurora{
+      position: fixed; inset: -20vmax;
+      background: radial-gradient(40vmax 40vmax at 10% 10%, var(--cloud-light), transparent),
+                  radial-gradient(30vmax 30vmax at 80% 20%, var(--cloud-mid), transparent),
+                  radial-gradient(35vmax 35vmax at 50% 80%, var(--cloud-dark), transparent);
+      filter: blur(40px);
+      z-index: -1;
+      animation: float 18s ease-in-out infinite alternate;
+    }
+    @keyframes float {
+      to { transform: translate3d(0, -2%, 0) scale(1.03); }
+    }
+
+    header{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:16px 20px; position:sticky; top:0; backdrop-filter: blur(10px);
+      background:linear-gradient(to bottom, rgba(255,255,255,.7), rgba(255,255,255,.35));
+      border-bottom:1px solid rgba(0,0,0,.06); z-index:10;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .brand{display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.2px; font-size: 1.2rem; color: var(--accent);}
+    .brand i{color:var(--accent2)}
+    .nav-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    
+    #user-email {
+      font-size: 14px;
+      font-weight: 500;
+      padding: 5px 10px;
+      background: rgba(129, 140, 248, 0.1);
+      border-radius: 20px;
+      border: 1px solid rgba(129, 140, 248, 0.2);
+    }
+    
+    .btn{border:1px solid rgba(0,0,0,.15); background:rgba(255,255,255,.8); color:var(--text); padding:10px 16px; border-radius:12px; font-weight:600; cursor:pointer; transition: transform .06s ease, opacity .15s ease, background .2s; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);}
+    .btn:hover{opacity:.95; background:rgba(255,255,255,1);}
+    .btn-primary{border-color: transparent; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: white;}
+    .btn:active{transform:scale(.98)}
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .btn:disabled:hover {
+      background: rgba(255,255,255,.8);
+      opacity: 0.6;
+    }
+
+    .hero{
+      max-width:1200px; margin:48px auto 28px; padding:0 20px; display:grid; grid-template-columns:1.2fr .8fr; gap:28px;
+    }
+    @media (max-width: 900px){ .hero{grid-template-columns:1fr; } }
+    .hero-card{
+      background:var(--card);
+      border:1px solid rgba(0,0,0,.08); border-radius:18px; padding:28px; box-shadow: 0 10px 25px var(--ring);
+    }
+    .hero h1{margin:0 0 16px; font-size: clamp(28px, 4vw, 44px); line-height:1.2; color: var(--ink);}
+    .hero p{margin:0; color:var(--muted); font-size:16px}
+    .badges{display:flex; gap:10px; margin-top:20px; flex-wrap:wrap}
+    .chip{font-size:12px; background:var(--cloud-light); border:1px solid var(--cloud-mid); border-radius:999px; padding:6px 12px; color:#1e3a8a; display:inline-flex; align-items:center; gap:8px}
+    .chip i{color:#1e40af}
+
+    .story{
+      margin-top:16px; color:#334155; font-size:16px; line-height: 1.7;
+    }
+    .story em{color:#4f46e5; font-style:normal; font-weight: 600;}
+
+    .upload{
+      background:linear-gradient(180deg, var(--cloud-light), var(--card));
+      border:1px solid var(--cloud-mid); border-radius:18px; padding:24px;
+      box-shadow: 0 10px 25px rgba(147, 197, 253, 0.2);
+    }
+    .upload h3{margin:0 0 12px; display: flex; align-items: center; gap: 10px; color: var(--ink);}
+    .note{font-size:14px; color:#ef4444; margin:8px 0 16px; display: flex; align-items: center; gap: 8px;}
+    .oknote{color:#10b981}
+    .drop{
+      border:2px dashed var(--cloud-mid); border-radius:14px; background:var(--cloud-light);
+      padding:24px; text-align:center; color:#1e40af; transition: all 0.3s ease;
+    }
+    .drop.drag{border-color: var(--accent2); background: var(--cloud-mid);}
+    .drop input{display:none}
+    .drop .hint{font-size:13px; color:#64748b; margin-top: 12px;}
+    .controls{display:flex; gap:12px; margin-top:20px; flex-wrap:wrap}
+
+    main{max-width:1200px; margin:10px auto 48px; padding:0 20px;}
+    #status{margin:18px 0 14px; color:#334155; font-size:15px; display: flex; align-items: center; gap: 8px;}
+    .grid{display:grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap:20px;}
+    .card{background:var(--card); border:1px solid rgba(0,0,0,.08); border-radius:14px; overflow:hidden; box-shadow:0 8px 20px var(--ring); transition:transform .12s}
+    .card:hover{transform: translateY(-3px)}
+    .card .thumb{height:240px; width:100%; object-fit:cover}
+    .card .foot{padding:12px 14px; display:flex; align-items:center; justify-content:space-between; color:#64748b; font-size:13px}
+
+    footer{
+      padding:32px 20px; border-top:1px solid rgba(0,0,0,.08); background:linear-gradient(180deg, rgba(255,255,255,.4), transparent);
+      display:grid; grid-template-columns: 1fr auto; gap:16px; align-items:center;
+    }
+    @media (max-width: 700px){ 
+      footer{grid-template-columns:1fr; text-align:center; justify-items:center}
+    }
+    .socials{display:flex; gap:12px}
+    .socials a{height:40px; width:40px; display:grid; place-items:center; border-radius:10px; background:rgba(255,255,255,.8); border:1px solid rgba(0,0,0,.12); transition: all 0.2s ease; color: var(--text);}
+    .socials a:hover{background:var(--cloud-light); transform: translateY(-2px);}
+
+    /* Snackbar styles */
+    .snackbar {
+      visibility: hidden;
+      min-width: 300px;
+      margin-left: -150px;
+      background-color: var(--card);
+      color: var(--text);
+      text-align: center;
+      border-radius: 12px;
+      padding: 16px 20px;
+      position: fixed;
+      z-index: 1000;
+      left: 50%;
+      bottom: 30px;
+      border: 1px solid var(--cloud-mid);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transform: translateY(20px);
+      opacity: 0;
+      transition: opacity 0.3s, transform 0.3s;
+    }
+
+    .snackbar.show {
+      visibility: visible;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .snackbar i {
+      font-size: 20px;
+      color: var(--accent2);
+    }
+
+    .snackbar .close-btn {
+      margin-left: auto;
+      background: none;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      color: var(--muted);
+      padding: 0;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .snackbar .close-btn:hover {
+      color: var(--text);
+    }
+
+    .cloud-components {
+      margin-top: 24px;
+      padding: 16px;
+      background: var(--cloud-light);
+      border-radius: 12px;
+      border: 1px solid var(--cloud-mid);
+    }
+
+    .cloud-components h4 {
+      margin-top: 0;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--ink);
+    }
+
+    .components-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 12px;
+    }
+
+    .component {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 12px 8px;
+      background: var(--card);
+      border-radius: 8px;
+      font-size: 12px;
+      border: 1px solid var(--cloud-mid);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    .component i {
+      font-size: 20px;
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <div class="aurora"></div>
+
+  <header>
+    <div class="brand"><i class="fa-solid fa-cloud"></i> One Shot Gallery</div>
+    <div class="nav-actions">
+      <button id="auth-toggle-btn" class="btn" onclick="App.toggleAuth()">
+        <i class="fa-solid fa-right-to-bracket"></i> <span id="auth-btn-text">Sign In</span>
+      </button>
+      <span id="user-email" style="display: none; align-self: center; margin-right: 10px; color: #64748b;"></span>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-card">
+      <h1>Your <span style="color:#818cf8">one</span> chance to share a memory with the world.</h1>
+      <p class="story">
+        You get <em>one upload</em> per lifetime. No usernames. No feeds. Just a single photo that means everything to you,
+        a quiet sunrise, a reunion, a win you never thought would happen. 
+        This wall is a living album of people's <strong>best</strong> moments.
+      </p>
+      <div class="badges">
+        <span class="chip"><i class="fa-solid fa-cloud"></i> Built end-to-end on AWS</span>
+        <span class="chip"><i class="fa-solid fa-shield"></i> Anonymous by design</span>
+        <span class="chip"><i class="fa-solid fa-code"></i> By Subhan Farooq · Cloud Software Engineer</span>
+      </div>
+      
+      <div class="cloud-components">
+        <h4><i class="fa-solid fa-cloud-arrow-up"></i> Cloud Architecture</h4>
+        <div class="components-grid">
+          <div class="component">
+            <i class="fa-brands fa-aws"></i>
+            <span>Lambda</span>
+          </div>
+          <div class="component">
+            <i class="fa-solid fa-gateway"></i>
+            <span>API Gateway</span>
+          </div>
+          <div class="component">
+            <i class="fa-solid fa-database"></i>
+            <span>S3</span>
+          </div>
+          <div class="component">
+            <i class="fa-solid fa-cloud-arrow-down"></i>
+            <span>CloudFront</span>
+          </div>
+          <div class="component">
+            <i class="fa-solid fa-user-shield"></i>
+            <span>Cognito</span>
+          </div>
+          <div class="component">
+            <i class="fa-solid fa-bell"></i>
+            <span>SNS</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="upload hero-card">
+      <h3><i class="fa-solid fa-upload"></i> Upload one photo</h3>
+      <p id="upload-note" class="note"><i class="fa-solid fa-circle-info"></i> Only one image per person. Sign in to upload.</p>
+
+      <div id="drop" class="drop">
+        <input id="file" type="file" accept="image/*" />
+        <p><strong>Drag & drop</strong> your image here, or <a href="#" onclick="document.getElementById('file').click();return false;">browse</a></p>
+        <div class="hint">JPG / PNG / WEBP · Max 2MB</div>
+        <div id="preview" style="margin-top:16px; display:none"></div>
+      </div>
+
+      <div class="controls">
+        <button id="btn-upload" class="btn btn-primary" disabled onclick="App.upload()">
+          <i class="fa-solid fa-paper-plane"></i> Send to the Sky
+        </button>
+        <button class="btn" onclick="App.loadGallery()"><i class="fa-solid fa-rotate-right"></i> Refresh Gallery</button>
+      </div>
+    </div>
+  </section>
+
+  <main id="gallery">
+    <div id="status"><i class="fa-solid fa-spinner fa-spin"></i> Loading gallery…</div>
+    <div class="grid" id="grid"></div>
+  </main>
+
+  <footer>
+    <div>
+      <div style="font-weight:600; margin-bottom:8px">This is a wall of firsts, last times, and everything in between.</div>
+      <div style="color:#64748b; font-size:14px">Made with ❤️ by Subhan using AWS Lambda · API Gateway · S3 · CloudFront · Cognito · SNS</div>
+    </div>
+    <div class="socials" aria-label="Social links">
+      <!-- Replace URLs with your actual profiles -->
+      <a href="https://www.linkedin.com/in/subhan-farooq/" target="_blank" title="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+      <a href="https://github.com/subhan-uf" target="_blank" title="GitHub"><i class="fa-brands fa-github"></i></a>
+      <a href="https://subhans-portfolio.netlify.app/" target="_blank" title="Portfolio"><i class="fa-solid fa-globe"></i></a>
+      <a href="https://www.upwork.com/freelancers/~013c4624f8a8ad944b" target="_blank" title="Upwork"><i class="fa-brands fa-upwork"></i></a>
+    </div>
+  </footer>
+
+  <!-- Snackbar for notifications -->
+  <div id="snackbar" class="snackbar">
+    <i class="fa-solid fa-circle-info"></i>
+    <span id="snackbar-text">Your image has been uploaded! The admin will review it within 24 hours.</span>
+    <button class="close-btn" onclick="App.closeSnackbar()">×</button>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
