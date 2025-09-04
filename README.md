@@ -2,7 +2,7 @@
 
 
 # 🌌 One Shot Gallery — Built on AWS
-*A living wall of people’s favorite memories. Upload **one** photo — your best — anonymously. Curated and delivered by a fully serverless AWS stack.*
+*A living wall of people’s favorite memories. Upload **one** photo, your best, anonymously. Curated and delivered by a fully serverless AWS stack.*
 
 ![Hero](./images/hero.png)
 
