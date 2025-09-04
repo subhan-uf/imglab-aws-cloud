@@ -68,6 +68,12 @@ From a cloud engineering perspective, it demonstrates:
 
 ![Pending (Admin view)](./images/pending.png)
 
+### SNS Message to Admin
+- Admin is notified anytime someone uploads a picture
+- This way inappropriate uploaded material can be rejected
+
+![SNS Message (SNS Email)](./images/SNS.png)
+
 ---
 
 ## ⚙️ Configuration (High-Level)
@@ -189,7 +195,7 @@ From a cloud engineering perspective, it demonstrates:
 
 ---
 
-## 🗂 Suggested Repository Layout (Illustrative)
+## 🗂 Repository Layout (Illustrative)
 
 - `README.md`  
 - `public/` — Public SPA (HTML/JS, images)  
@@ -198,7 +204,7 @@ From a cloud engineering perspective, it demonstrates:
 - `images/` — Screenshots referenced in this README  
   - `hero.png`, `public.png`, `pending.png`, `gallery.png`, `architecture.png`
 
-> Replace screenshots with your own; paths above assume `./images/...`.
+
 
 ---
 
