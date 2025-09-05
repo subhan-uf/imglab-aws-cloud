@@ -11,7 +11,7 @@
 
 ---
 
-## 🔗 Live URLs
+## 🔗 Live URLs:
 
 - **Public Gallery:** https://d2kvyx5urqn7yh.cloudfront.net  
 - **Admin Portal:** https://d3c6k5dylm8spf.cloudfront.net
